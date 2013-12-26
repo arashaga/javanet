@@ -23,7 +23,8 @@ class Thread_Client extends Thread {
     //test
     InputStreamReader isr;
     BufferedReader br;
-    DataOutputStream dos;
+    // DataOutputStream dos;
+    PrintWriter pWriter;
     Terminal terminal;
     Screen screen;
     ScreenWriter writer;
@@ -41,16 +42,25 @@ class Thread_Client extends Thread {
             x = 5;
             y = 3;
 
-
+// old code
+//            s = new Socket("Localhost", 25003);
+//            dis = new DataInputStream(s.getInputStream());
+//            //test
+//            isr = new InputStreamReader(System.in);
+//
+//            br = new BufferedReader(isr);
+//
+//            dos = new DataOutputStream(s.
+//                    getOutputStream());
+            
+            // new code
             s = new Socket("Localhost", 25003);
-            dis = new DataInputStream(s.getInputStream());
-            //test
+
             isr = new InputStreamReader(System.in);
-
             br = new BufferedReader(isr);
-
-            dos = new DataOutputStream(s.
-                    getOutputStream());
+            pWriter = new PrintWriter(s.getOutputStream());
+            
+            
 
 
             terminal = TerminalFacade.createTerminal(System.in, System.out, Charset.forName("UTF8"));
@@ -59,7 +69,7 @@ class Thread_Client extends Thread {
             screen.startScreen();
             writeOnScreen("Watching.............");
         } catch (Exception ie) {
-            System.out.println(ie);
+            ie.printStackTrace();
         }
         // start();
     }
@@ -95,9 +105,12 @@ class Thread_Client extends Thread {
                 if (br.ready()) {
                     msg = br.readLine();
                 }
+
                 if (msg.equals("Bye Bye")) {
                     System.exit(0);
                 }
+                
+                pWriter.println(msg);
            //     dos.writeUTF(msg);
             //    dos.close();
             //    System.out.println("Client's dos closed! \n");
