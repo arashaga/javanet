@@ -23,16 +23,25 @@ import java.util.logging.Logger;
 class Thread_Server implements PropertyChangeListener {
 
     private boolean isChanged;
+    int counter = 1;
+    InputStreamReader isr;
+    ServerSocket ss;
+    private Socket s;
+    private String dispMsg;
+    private PrintWriter pwDispMsg;
+    private DataOutputStream dos;
+    private ArrayList<PrintWriter> clientOutputStream;
 
     public class ClientHandler implements Runnable {
 
         BufferedReader reader;
         Socket socket;
+        InputStreamReader iReader;
 
         public ClientHandler(Socket ClientSocket) {
             try {
                 socket = ClientSocket;
-                InputStreamReader iReader = new InputStreamReader(socket.getInputStream());
+                iReader = new InputStreamReader(socket.getInputStream());
                 reader = new BufferedReader(iReader);
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -43,31 +52,28 @@ class Thread_Server implements PropertyChangeListener {
             String clientMessage;
 
             try {
-                while (((clientMessage = reader.readLine()) != null) || (isChanged = true)) {
+                while (true) {
 
 
                     if (((clientMessage = reader.readLine()) != null)) {
                         System.out.println("Client: " + clientMessage);
                     }
 
-                    if (isChanged = true) {
+                    if (isChanged) {
                         System.out.println("Server: " + dispMsg);
                         notifyStatusChange();
                         isChanged = false;
                     }
-                    // sleep(250);
+                     sleep(250);
 
                 }
             } catch (IOException ex) {
                 Logger.getLogger(Thread_Server.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Thread_Server.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
-    ServerSocket ss;
-    static Socket s;
-    private String dispMsg;
-    private DataOutputStream dos;
-    private ArrayList<PrintWriter> clientOutputStream;
 
     public void goServer() {
 
@@ -76,12 +82,16 @@ class Thread_Server implements PropertyChangeListener {
 
             while (true) {
                 s = ss.accept();
-                
-                PrintWriter writer = new PrintWriter(s.getOutputStream());
-                clientOutputStream.add(writer);
+                // isr = new InputStreamReader(s.getInputStream());
+
+                PrintWriter writer = new PrintWriter(s.getOutputStream(), true);
+                writer.println("Hello," + s.getInetAddress().getHostName() + "! You are now"
+                        + " connected!\n ");
                 Thread t = new Thread(new ClientHandler((s)));
                 t.start();
-                System.out.println("Got another connection! \n");
+                System.out.println("Connection " + counter + " received from: "
+                        + s.getInetAddress().getHostName());
+                counter++;
             }
 
         } catch (Exception e) {
@@ -97,7 +107,7 @@ class Thread_Server implements PropertyChangeListener {
 
     public Thread_Server() {
         System.out.println("Server is to watch.....");
-        isChanged = true;
+        isChanged = false;
         if (dispMsg == null) {
             dispMsg = "Waiting for a change...";
         }
@@ -110,23 +120,27 @@ class Thread_Server implements PropertyChangeListener {
         dispMsg = "Event to String: " + pce.toString() + "\n"
                 + "Property Name: " + pce.getPropertyName() + "\n"
                 + "Old Value" + pce.getOldValue() + "\n";
+        
     }
 
-    public void notifyStatusChange() {
+    // Changed 12/26/13 
+    public void notifyStatusChange() throws IOException {
 
-        Iterator it = clientOutputStream.iterator();
-
-
-        try {
-
-            while (it.hasNext()) {
-                PrintWriter writer = (PrintWriter) it.next();
-                writer.println(dispMsg);
-                writer.flush();
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        PrintWriter pw = new PrintWriter(s.getOutputStream());
+        pw.println(dispMsg);
+//        Iterator it = clientOutputStream.iterator();
+//
+//
+//        try {
+//
+//            while (it.hasNext()) {
+//                PrintWriter writer = (PrintWriter) it.next();
+//                writer.println(dispMsg);
+//                writer.flush();
+//            }
+//        } catch (Exception ex) {
+//            ex.printStackTrace();
+//        }
 
     }
 
@@ -146,10 +160,10 @@ class Thread_Server implements PropertyChangeListener {
             if (dir == null) {
                 WatcherDir.usage();
             } else {
-               thSrv.goServer();
+                thSrv.goServer();
                 wDir.addPropertyChangeListener(thSrv);
                 wDir.start();
-                
+
             }
         } catch (IOException ex) {
             Logger.getLogger(Thread_Server.class.getName()).log(Level.SEVERE, null, ex);

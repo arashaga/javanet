@@ -23,7 +23,8 @@ class Thread_Client extends Thread {
     //test
     InputStreamReader isr;
     BufferedReader br;
-    // DataOutputStream dos;
+     BufferedReader stdIn;
+ 
     PrintWriter pWriter;
     Terminal terminal;
     Screen screen;
@@ -34,7 +35,7 @@ class Thread_Client extends Thread {
     int y;
 
     public Thread_Client() {
-        try {
+        try  {
 
             System.out.println("Client is ready...(Type ur message):\\n");
 
@@ -44,7 +45,7 @@ class Thread_Client extends Thread {
 
 // old code
 //            s = new Socket("Localhost", 25003);
-//            dis = new DataInputStream(s.getInputStream());
+ //           dis = new DataInputStream(s.getInputStream());
 //            //test
 //            isr = new InputStreamReader(System.in);
 //
@@ -56,11 +57,11 @@ class Thread_Client extends Thread {
             // new code
             s = new Socket("Localhost", 25003);
 
-            isr = new InputStreamReader(System.in);
+            isr = new InputStreamReader(s.getInputStream());
             br = new BufferedReader(isr);
             pWriter = new PrintWriter(s.getOutputStream());
             
-            
+             stdIn = new BufferedReader(new InputStreamReader(System.in));
 
 
             terminal = TerminalFacade.createTerminal(System.in, System.out, Charset.forName("UTF8"));
@@ -102,8 +103,8 @@ class Thread_Client extends Thread {
             try {
 
                 //test
-                if (br.ready()) {
-                    msg = br.readLine();
+                if (stdIn.ready()) {
+                    msg = stdIn.readLine();
                 }
 
                 if (msg.equals("Bye Bye")) {
@@ -115,7 +116,8 @@ class Thread_Client extends Thread {
             //    dos.close();
             //    System.out.println("Client's dos closed! \n");
 
-                writeOnScreen("Server: " + dis.readUTF());
+                writeOnScreen("Server: " + br.readLine());
+             
                 synchronized (this) {
                     wait(1000);
                 }
