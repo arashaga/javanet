@@ -37,7 +37,7 @@ class Thread_Client extends Thread {
     public Thread_Client() {
         try  {
 
-            System.out.println("Client is ready...(Type ur message):\\n");
+            System.out.println("Client is ready...(Type ur message):\n");
 
             // writeOnScreen paramters
             x = 5;
@@ -111,7 +111,7 @@ class Thread_Client extends Thread {
                     System.exit(0);
                 }
                 
-                pWriter.println(msg);
+                pWriter.println(msg+"\n");
            //     dos.writeUTF(msg);
             //    dos.close();
             //    System.out.println("Client's dos closed! \n");

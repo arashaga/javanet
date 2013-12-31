@@ -16,6 +16,8 @@ import static java.nio.file.LinkOption.*;
 import java.nio.file.attribute.*;
 import java.io.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 //import javaexperiment.server.TestClientWacherBean;
 
 /**
@@ -76,6 +78,7 @@ public class WatcherDir extends Thread {
     private void registerAll(final Path start) throws IOException {
         // register directory and sub-directories
         Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
+           
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
                     throws IOException {
@@ -92,7 +95,9 @@ public class WatcherDir extends Thread {
      * Creates a WatchService and registers the given directory
      */
     WatcherDir(Path dir, boolean recursive) throws IOException {
+        super.setName("Watcher Thread");
         this.watcher = FileSystems.getDefault().newWatchService();
+        
         this.keys = new HashMap<WatchKey, Path>();
         this.recursive = recursive;
 
@@ -123,7 +128,9 @@ public class WatcherDir extends Thread {
      */
     @Override
     public void run() {
+        
         processEvents();
+    
     }
 
     void processEvents() {
@@ -134,6 +141,7 @@ public class WatcherDir extends Thread {
                 WatchKey key;
                 try {
                     key = watcher.take();
+                    
                 } catch (InterruptedException x) {
                     return;
                 }
