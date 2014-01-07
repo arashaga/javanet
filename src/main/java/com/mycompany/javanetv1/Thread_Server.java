@@ -70,9 +70,12 @@ class Thread_Server implements PropertyChangeListener {
                     if (isChanged) {
                         System.out.println("Server1: " + dispMsg);
                         notifyStatusChange();
+                        synchronized (this){
+                            wait(250);
+                        }
                         isChanged = false;
                     }
-                    sleep(250);
+                    
                     
                 }
             } catch (IOException ex) {
@@ -163,7 +166,21 @@ class Thread_Server implements PropertyChangeListener {
         
         
         try {
-            Path dir = Paths.get("c:\\\\test");
+            if (args.length != 1) {
+            
+                
+               
+                System.out.println("Please provide the fully qualified path as an argument.\n"
+                        + "Example: Javanet /path/to/the/directory");
+                return;
+            }
+            
+             //Enable this for testing porpuses and disable the code above 
+             // Path dir = Paths.get("c:\\\\test");
+            Path dir = Paths.get(args[0]);
+                
+            
+           // Path dir = Paths.get("c:\\\\test");
             WatcherDir wDir = new WatcherDir(dir, true);
             System.out.println("Thread: " + Thread.currentThread().getName() + "\n");
             Thread_Server thSrv = new Thread_Server();

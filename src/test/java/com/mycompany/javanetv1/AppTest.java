@@ -1,4 +1,4 @@
-package com.mycompany.javanetv1.;
+package com.mycompany.javanetv1;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

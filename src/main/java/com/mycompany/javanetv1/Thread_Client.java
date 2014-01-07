@@ -8,6 +8,11 @@ package com.mycompany.javanetv1;
  *
  * @author arash
  */
+
+//TODO: 1/1/13the client cannot exit gracefull, also the client will not receive the notification
+//unless I hit enter. The notification from the srever side needs to be fixed as well to produce
+// more sensible message. The client's screen needs to be fixed completely. when the size of the
+//terminal is resized , the whole thing gets messed up.
 import com.googlecode.lanterna.TerminalFacade;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.screen.ScreenWriter;
@@ -23,8 +28,7 @@ class Thread_Client extends Thread {
     //test
     InputStreamReader isr;
     BufferedReader br;
-     BufferedReader stdIn;
- 
+    BufferedReader stdIn;
     PrintWriter pWriter;
     Terminal terminal;
     Screen screen;
@@ -35,7 +39,7 @@ class Thread_Client extends Thread {
     int y;
 
     public Thread_Client() {
-        try  {
+        try {
 
             System.out.println("Client is ready...(Type ur message):\n");
 
@@ -45,7 +49,7 @@ class Thread_Client extends Thread {
 
 // old code
 //            s = new Socket("Localhost", 25003);
- //           dis = new DataInputStream(s.getInputStream());
+            //           dis = new DataInputStream(s.getInputStream());
 //            //test
 //            isr = new InputStreamReader(System.in);
 //
@@ -53,15 +57,15 @@ class Thread_Client extends Thread {
 //
 //            dos = new DataOutputStream(s.
 //                    getOutputStream());
-            
+
             // new code
             s = new Socket("Localhost", 25003);
 
             isr = new InputStreamReader(s.getInputStream());
             br = new BufferedReader(isr);
             pWriter = new PrintWriter(s.getOutputStream());
-            
-             stdIn = new BufferedReader(new InputStreamReader(System.in));
+
+            stdIn = new BufferedReader(new InputStreamReader(System.in));
 
 
             terminal = TerminalFacade.createTerminal(System.in, System.out, Charset.forName("UTF8"));
@@ -83,11 +87,11 @@ class Thread_Client extends Thread {
 
             writer.setForegroundColor(Terminal.Color.BLACK);
             writer.setBackgroundColor(Terminal.Color.WHITE);
-            writer.drawString(5, this.y, string);
+            writer.drawString(2, this.y, string);
             screen.refresh();
-            this.y += 3;
+            this.y += 1;
         } else {
-            this.y = 3;
+            this.y = 1;
             screen.clear();
             writeOnScreen(string);
         }
@@ -110,16 +114,15 @@ class Thread_Client extends Thread {
                 if (msg.equals("Bye Bye")) {
                     System.exit(0);
                 }
-                
-                pWriter.println(msg+"\n");
-           //     dos.writeUTF(msg);
-            //    dos.close();
-            //    System.out.println("Client's dos closed! \n");
 
-                writeOnScreen("Server: " + br.readLine());
-             
+                pWriter.println(msg + "\n");
+
+                if (br.ready()) {
+                    writeOnScreen("Server: " + br.readLine());
+                }
+
                 synchronized (this) {
-                    wait(1000);
+                    wait(250);
                 }
             } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
